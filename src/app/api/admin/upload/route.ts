@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { v2 as cloudinary } from 'cloudinary'
 
+export const config = { api: { bodyParser: false } }
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -16,12 +18,14 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(bytes)
     const result = await new Promise<any>((resolve, reject) => {
       cloudinary.uploader.upload_stream(
-        { folder: 'luxe-boutique' },
+        { folder: 'luxe-boutique', resource_type: 'image' },
         (error, result) => error ? reject(error) : resolve(result)
       ).end(buffer)
     })
-    return NextResponse.json({ url: result.secure_url })
+    const url = result.secure_url
+    return NextResponse.json({ url })
   } catch (err: any) {
+    console.error('Upload error:', err.message)
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
