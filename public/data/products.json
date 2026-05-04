@@ -1,10 +1,1 @@
-[
-  {"id":"1","name":"Lampe Arc Dorée","price":890,"category":"maison","description":"Lampe sur pied en métal doré, design contemporain","image":"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80","badge":"nouveau","stock":15,"slug":"lampe-arc-doree","createdAt":"2026-01-01"},
-  {"id":"2","name":"Miroir Ovale Arche","price":1200,"category":"maison","description":"Miroir mural arche, cadre doré mat 60x120cm","image":"https://images.unsplash.com/photo-1576020799627-aeac74d58064?w=600&q=80","stock":8,"slug":"miroir-ovale-arche","createdAt":"2026-01-01"},
-  {"id":"3","name":"Bougie Oud & Rose","price":280,"category":"maison","description":"Bougie artisanale cire soja, 60h de brûlage","image":"https://images.unsplash.com/photo-1602607165068-3afc1b67e521?w=600&q=80","badge":"bestseller","stock":45,"slug":"bougie-oud-rose","createdAt":"2026-01-01"},
-  {"id":"7","name":"Blazer Structuré Ivoire","price":1100,"category":"mode","description":"Blazer ajusté crêpe de laine, coupe française","image":"https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80","badge":"nouveau","stock":10,"slug":"blazer-structure-ivoire","createdAt":"2026-01-01"},
-  {"id":"8","name":"Sac Cuir Camel","price":1800,"category":"mode","description":"Sac à main cuir véritable, fermoir doré","image":"https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&q=80","badge":"bestseller","stock":6,"slug":"sac-cuir-camel","createdAt":"2026-01-01"},
-  {"id":"12","name":"Parfum Oud Intense","price":650,"category":"beaute","description":"Eau de parfum 100ml, oud, ambre & rose","image":"https://images.unsplash.com/photo-1541643600914-78b084683702?w=600&q=80","badge":"bestseller","stock":25,"slug":"parfum-oud-intense","createdAt":"2026-01-01"},
-  {"id":"15","name":"Casque Audio Premium","price":1200,"category":"tech","description":"Casque sans fil ANC, 30h d'autonomie","image":"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80","stock":14,"slug":"casque-audio-premium","createdAt":"2026-01-01"},
-  {"id":"18","name":"Robot Pâtissier Pro","price":2800,"category":"cuisine","description":"Robot 6.5L, 1200W, 10 vitesses + minuteur","image":"https://images.unsplash.com/photo-1556910103-1c02745adc4b?w=600&q=80","stock":7,"slug":"robot-patissier-pro","createdAt":"2026-01-01"}
-]
+[]
