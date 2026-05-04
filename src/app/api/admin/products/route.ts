@@ -2,13 +2,27 @@ import { NextRequest, NextResponse } from 'next/server'
 import { writeJSONToGitHub } from '@/lib/github'
 
 const GITHUB_PATH = 'public/data/products.json'
-const RAW_URL = `https://raw.githubusercontent.com/${process.env.GITHUB_REPO}/${process.env.GITHUB_BRANCH}/${GITHUB_PATH}`
 
 async function readProducts() {
   try {
-    const res = await fetch(RAW_URL + '?t=' + Date.now(), { cache: 'no-store' })
+    const token = process.env.GITHUB_TOKEN
+    const repo = process.env.GITHUB_REPO
+    const branch = process.env.GITHUB_BRANCH || 'main'
+    const res = await fetch(
+      `https://api.github.com/repos/${repo}/contents/${GITHUB_PATH}?ref=${branch}&t=${Date.now()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'User-Agent': 'luxe-cms',
+          'Accept': 'application/vnd.github.v3+json'
+        },
+        cache: 'no-store'
+      }
+    )
     if (!res.ok) return []
-    return await res.json()
+    const data = await res.json()
+    const content = Buffer.from(data.content.replace(/\n/g, ''), 'base64').toString('utf-8')
+    return JSON.parse(content)
   } catch { return [] }
 }
 
