@@ -43,7 +43,11 @@ export default function ProduitsPage() {
     fd.append('file', file)
     const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
     const data = await res.json()
-    setForm(f => ({ ...f, image: data.url }))
+    if (data.url) {
+      setForm(f => ({ ...f, image: data.url }))
+    } else {
+      alert("Erreur upload: " + (data.error || "inconnu"))
+    }
     setUploading(false)
   }
 
