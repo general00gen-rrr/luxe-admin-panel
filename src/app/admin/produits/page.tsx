@@ -39,14 +39,19 @@ export default function ProduitsPage() {
     if (!file) return
     setPreview(URL.createObjectURL(file))
     setUploading(true)
-    const fd = new FormData()
-    fd.append('file', file)
-    const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
-    const data = await res.json()
-    if (data.url) {
-      setForm(f => ({ ...f, image: data.url }))
-    } else {
-      alert("Erreur upload: " + (data.error || "inconnu"))
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('upload_preset', 'ml_default')
+      const res = await fetch('https://api.cloudinary.com/v1_1/deuudcsc5/image/upload', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (data.secure_url) {
+        setForm(f => ({ ...f, image: data.secure_url }))
+      } else {
+        alert("Erreur upload: " + JSON.stringify(data.error))
+      }
+    } catch(err: any) {
+      alert("Erreur: " + err.message)
     }
     setUploading(false)
   }
