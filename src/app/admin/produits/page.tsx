@@ -189,9 +189,6 @@ export default function ProduitsPage() {
                 )}
               </div>
               <input ref={fileRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden"/>
-              {!form.image && !uploading && (
-                <p className="text-red-400 text-sm mt-2">image obligatoire</p>
-              )}
                 <p className="text-red-400 text-sm mt-2">⚠️ صورة المنتج مطلوبة قبل النشر</p>
               )}
             </div>
