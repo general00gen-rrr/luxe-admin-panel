@@ -49,6 +49,9 @@ export async function POST(request: NextRequest) {
     const product = await request.json()
     product.id = product.id || Date.now().toString()
     product.createdAt = new Date().toISOString()
+    if (!product.slug) product.slug = product.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')
+    if (!product.rating) product.rating = parseFloat((4.4 + Math.random() * 0.6).toFixed(1))
+    if (!product.reviews) product.reviews = Math.floor(Math.random() * 124) + 27
     const result = await ghGet(FILE_PATH)
     const list = Array.isArray(result.content) ? result.content : []
     list.push(product)
