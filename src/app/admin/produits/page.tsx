@@ -72,10 +72,10 @@ export default function ProduitsPage() {
     const payload = { ...form, price: Number(form.price), originalPrice: form.originalPrice ? Number(form.originalPrice) : undefined, stock: Number(form.stock) }
     if (editing) {
       await fetch('/api/admin/products', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      setSuccess('✅ Produit modifié !')
+      setSuccess('Produit modifie')
     } else {
       await fetch('/api/admin/products', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      setSuccess('✅ Produit ajouté !')
+      setSuccess('Produit ajoute')
     }
     setSaving(false)
     await loadProducts()
@@ -84,9 +84,9 @@ export default function ProduitsPage() {
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`Supprimer "${name}" ?`)) return
+    if (!confirm('Supprimer ' + name + ' ?')) return
     await fetch('/api/admin/products', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })
-    setSuccess('🗑️ Produit supprimé')
+    setSuccess('Produit supprime')
     await loadProducts()
     setTimeout(() => setSuccess(''), 3000)
   }
@@ -109,7 +109,7 @@ export default function ProduitsPage() {
         <div className="space-y-3">
           {products.length === 0 && (
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center">
-              <p className="text-gray-500 text-lg">Aucun produit pour l'instant</p>
+              <p className="text-gray-500 text-lg">Aucun produit pour linstant</p>
               <button onClick={() => setTab('form')} className="mt-4 bg-amber-500 text-black font-bold px-5 py-2 rounded-lg">
                 + Ajouter le premier produit
               </button>
@@ -123,35 +123,35 @@ export default function ProduitsPage() {
                   <p className="font-bold text-white truncate">{p.name}</p>
                   {p.badge && <span className="text-xs bg-amber-500 text-black px-2 py-0.5 rounded-full font-bold">{p.badge}</span>}
                 </div>
-                <p className="text-gray-400 text-sm">{p.category} · {p.price} DH {p.originalPrice ? <span className="line-through text-gray-600">{p.originalPrice} DH</span> : ''}</p>
+                <p className="text-gray-400 text-sm">{p.category} {p.price} DH {p.originalPrice ? p.originalPrice + ' DH' : ''}</p>
                 <p className="text-gray-500 text-xs truncate">{p.description}</p>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => startEdit(p)} className="bg-blue-900 hover:bg-blue-800 text-blue-300 px-4 py-2 rounded-lg text-sm transition">✏️ Modifier</button>
-                <button onClick={() => handleDelete(p.id, p.name)} className="bg-red-900 hover:bg-red-800 text-red-300 px-4 py-2 rounded-lg text-sm transition">🗑️ Supprimer</button>
+                <button onClick={() => startEdit(p)} className="bg-blue-900 hover:bg-blue-800 text-blue-300 px-4 py-2 rounded-lg text-sm transition">Modifier</button>
+                <button onClick={() => handleDelete(p.id, p.name)} className="bg-red-900 hover:bg-red-800 text-red-300 px-4 py-2 rounded-lg text-sm transition">Supprimer</button>
               </div>
             </div>
           ))}
         </div>
       ) : (
         <div className="max-w-2xl">
-          <button onClick={resetForm} className="text-gray-400 hover:text-white mb-6 flex items-center gap-2 transition">← Retour à la liste</button>
-          <h3 className="text-xl font-bold text-white mb-6">{editing ? '✏️ Modifier le produit' : '+ Nouveau produit'}</h3>
+          <button onClick={resetForm} className="text-gray-400 hover:text-white mb-6 flex items-center gap-2 transition">Retour a la liste</button>
+          <h3 className="text-xl font-bold text-white mb-6">{editing ? 'Modifier le produit' : 'Nouveau produit'}</h3>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Nom du produit *</label>
-              <input required value={form.name} onChange={handleName} placeholder="Ex: Lampe Arc Dorée" className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500"/>
+              <label className="block text-sm text-gray-400 mb-1">Nom du produit</label>
+              <input required value={form.name} onChange={handleName} placeholder="Ex: Lampe Arc Doree" className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500"/>
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-1">URL du produit (auto-générée)</label>
+              <label className="block text-sm text-gray-400 mb-1">URL du produit</label>
               <input readOnly value={form.slug} className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-amber-400 font-mono text-sm"/>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Prix (DH) *</label>
+                <label className="block text-sm text-gray-400 mb-1">Prix (DH)</label>
                 <input required type="number" value={form.price} onChange={e => setForm(f => ({...f, price: e.target.value}))} placeholder="890" className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500"/>
               </div>
               <div>
@@ -161,35 +161,36 @@ export default function ProduitsPage() {
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Catégorie *</label>
+              <label className="block text-sm text-gray-400 mb-1">Categorie</label>
               <select required value={form.category} onChange={e => setForm(f => ({...f, category: e.target.value}))} className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500">
                 {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Description *</label>
+              <label className="block text-sm text-gray-400 mb-1">Description</label>
               <textarea required value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))} rows={3} placeholder="Description courte du produit..." className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 resize-none"/>
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-2">📸 Image du produit *</label>
+              <label className="block text-sm text-gray-400 mb-2">Image du produit</label>
               <div onClick={() => fileRef.current?.click()} className="border-2 border-dashed border-gray-700 hover:border-amber-500 rounded-xl p-6 text-center cursor-pointer transition">
                 {preview ? (
                   <div>
                     <img src={preview} alt="preview" className="w-48 h-48 object-cover rounded-lg mx-auto mb-3"/>
-                    <p className="text-amber-400 text-sm">{uploading ? '⏳ Upload en cours...' : '✅ Image prête — cliquer pour changer'}</p>
+                    <p className="text-amber-400 text-sm">{uploading ? 'Upload en cours...' : 'Image prete - cliquer pour changer'}</p>
                   </div>
                 ) : (
                   <div>
-                    <p className="text-4xl mb-2">📷</p>
+                    <p className="text-4xl mb-2">+</p>
                     <p className="text-gray-400">Cliquer pour choisir une image</p>
                     <p className="text-gray-600 text-sm mt-1">JPG, PNG, WEBP</p>
                   </div>
                 )}
               </div>
               <input ref={fileRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden"/>
-                <p className="text-red-400 text-sm mt-2">⚠️ صورة المنتج مطلوبة قبل النشر</p>
+              {!form.image && (
+                <p className="text-red-400 text-sm mt-2">Image requise avant de publier</p>
               )}
             </div>
 
@@ -210,7 +211,7 @@ export default function ProduitsPage() {
             </div>
 
             <button type="submit" disabled={saving || uploading || !form.image} className="w-full bg-amber-500 hover:bg-amber-400 disabled:bg-gray-700 disabled:text-gray-500 text-black font-bold py-4 rounded-lg transition text-lg">
-              {saving ? '⏳ Enregistrement...' : uploading ? '⏳ Upload image...' : editing ? '✅ Enregistrer les modifications' : '🚀 Publier le produit'}
+              {saving ? 'Enregistrement...' : uploading ? 'Upload image...' : editing ? 'Enregistrer les modifications' : 'Publier le produit'}
             </button>
           </form>
         </div>
