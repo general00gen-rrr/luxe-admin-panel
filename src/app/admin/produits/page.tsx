@@ -14,7 +14,7 @@ function toSlug(name: string) {
   return name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
 }
 
-const empty = { id: '', name: '', slug: '', price: '', originalPrice: '', category: 'maison', description: '', image: '', badge: '', stock: '10' }
+const empty = { id: '', name: '', slug: '', price: '', originalPrice: '', category: 'maison', description: '', image: '', images: [] as string[], badge: '', stock: '10' }
 
 export default function ProduitsPage() {
   const [products, setProducts] = useState<any[]>([])
@@ -22,7 +22,7 @@ export default function ProduitsPage() {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState('')
-  const [preview, setPreview] = useState('')
+  const [previews, setPreviews] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
   const [tab, setTab] = useState<'list'|'form'>('list')
   const fileRef = useRef<HTMLInputElement>(null)
@@ -35,25 +35,35 @@ export default function ProduitsPage() {
   useEffect(() => { loadProducts() }, [])
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setPreview(URL.createObjectURL(file))
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
     setUploading(true)
-    try {
+    const newPreviews: string[] = []
+    const newUrls: string[] = []
+    for (const file of files) {
+      newPreviews.push(URL.createObjectURL(file))
       const fd = new FormData()
       fd.append('file', file)
       fd.append('upload_preset', 'ml_default')
       const res = await fetch('https://api.cloudinary.com/v1_1/deuudcsc5/image/upload', { method: 'POST', body: fd })
       const data = await res.json()
-      if (data.secure_url) {
-        setForm(f => ({ ...f, image: data.secure_url }))
-      } else {
-        alert("Erreur upload: " + JSON.stringify(data.error))
-      }
-    } catch(err: any) {
-      alert("Erreur: " + err.message)
+      if (data.secure_url) newUrls.push(data.secure_url)
+      else alert("Erreur upload: " + JSON.stringify(data.error))
     }
+    setPreviews(p => [...p, ...newPreviews])
+    setForm(f => {
+      const allImages = [...(f.images || []), ...newUrls]
+      return { ...f, images: allImages, image: allImages[0] || f.image }
+    })
     setUploading(false)
+  }
+
+  function removeImage(idx: number) {
+    setPreviews(p => p.filter((_, i) => i !== idx))
+    setForm(f => {
+      const imgs = f.images.filter((_, i) => i !== idx)
+      return { ...f, images: imgs, image: imgs[0] || '' }
+    })
   }
 
   function handleName(e: React.ChangeEvent<HTMLInputElement>) {
@@ -62,15 +72,16 @@ export default function ProduitsPage() {
   }
 
   function startEdit(p: any) {
-    setForm({ ...p, price: String(p.price), originalPrice: String(p.originalPrice || ''), stock: String(p.stock) })
-    setPreview(p.image)
+    const imgs = p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : []
+    setForm({ ...p, price: String(p.price), originalPrice: String(p.originalPrice || ''), stock: String(p.stock), images: imgs, image: imgs[0] || '' })
+    setPreviews(imgs)
     setEditing(true)
     setTab('form')
   }
 
   function resetForm() {
     setForm({ ...empty })
-    setPreview('')
+    setPreviews([])
     setEditing(false)
     setTab('list')
   }
@@ -78,13 +89,13 @@ export default function ProduitsPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    const payload = { ...form, price: Number(form.price), originalPrice: form.originalPrice ? Number(form.originalPrice) : undefined, stock: Number(form.stock) }
+    const payload = { ...form, price: Number(form.price), originalPrice: form.originalPrice ? Number(form.originalPrice) : undefined, stock: Number(form.stock), images: form.images, image: form.images[0] || form.image }
     if (editing) {
       await fetch('/api/admin/products', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      setSuccess('Produit modifie')
+      setSuccess('Produit modifié')
     } else {
       await fetch('/api/admin/products', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      setSuccess('Produit ajoute')
+      setSuccess('Produit ajouté')
     }
     setSaving(false)
     await loadProducts()
@@ -95,7 +106,7 @@ export default function ProduitsPage() {
   async function handleDelete(id: string, name: string) {
     if (!confirm('Supprimer ' + name + ' ?')) return
     await fetch('/api/admin/products', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })
-    setSuccess('Produit supprime')
+    setSuccess('Produit supprimé')
     await loadProducts()
     setTimeout(() => setSuccess(''), 3000)
   }
@@ -126,14 +137,14 @@ export default function ProduitsPage() {
           )}
           {products.map((p: any) => (
             <div key={p.id} className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center gap-4">
-              {p.image && <img src={p.image} alt={p.name} className="w-16 h-16 object-cover rounded-lg bg-gray-800"/>}
+              {(p.images?.[0] || p.image) && <img src={p.images?.[0] || p.image} alt={p.name} className="w-16 h-16 object-cover rounded-lg bg-gray-800"/>}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="font-bold text-white truncate">{p.name}</p>
                   {p.badge && <span className="text-xs bg-amber-500 text-black px-2 py-0.5 rounded-full font-bold">{p.badge}</span>}
                 </div>
-                <p className="text-gray-400 text-sm">{p.category} {p.price} DH {p.originalPrice ? p.originalPrice + ' DH' : ''}</p>
-                <p className="text-gray-500 text-xs truncate">{p.description}</p>
+                <p className="text-gray-400 text-sm">{p.category} — {p.price} DH</p>
+                <p className="text-gray-500 text-xs">{(p.images?.length || 1)} photo(s)</p>
               </div>
               <div className="flex gap-2">
                 <button onClick={() => startEdit(p)} className="bg-blue-900 hover:bg-blue-800 text-blue-300 px-4 py-2 rounded-lg text-sm transition">Modifier</button>
@@ -144,13 +155,13 @@ export default function ProduitsPage() {
         </div>
       ) : (
         <div className="max-w-2xl">
-          <button onClick={resetForm} className="text-gray-400 hover:text-white mb-6 flex items-center gap-2 transition">Retour a la liste</button>
+          <button onClick={resetForm} className="text-gray-400 hover:text-white mb-6 flex items-center gap-2 transition">← Retour à la liste</button>
           <h3 className="text-xl font-bold text-white mb-6">{editing ? 'Modifier le produit' : 'Nouveau produit'}</h3>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm text-gray-400 mb-1">Nom du produit</label>
-              <input required value={form.name} onChange={handleName} placeholder="Ex: Lampe Arc Doree" className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500"/>
+              <input required value={form.name} onChange={handleName} placeholder="Ex: Lampe Arc Dorée" className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500"/>
             </div>
 
             <div>
@@ -170,7 +181,7 @@ export default function ProduitsPage() {
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Categorie</label>
+              <label className="block text-sm text-gray-400 mb-1">Catégorie</label>
               <select required value={form.category} onChange={e => setForm(f => ({...f, category: e.target.value}))} className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500">
                 {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
@@ -182,24 +193,32 @@ export default function ProduitsPage() {
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-2">Image du produit</label>
-              <div onClick={() => fileRef.current?.click()} className="border-2 border-dashed border-gray-700 hover:border-amber-500 rounded-xl p-6 text-center cursor-pointer transition">
-                {preview ? (
-                  <div>
-                    <img src={preview} alt="preview" className="w-48 h-48 object-cover rounded-lg mx-auto mb-3"/>
-                    <p className="text-amber-400 text-sm">{uploading ? 'Upload en cours...' : 'Image prete - cliquer pour changer'}</p>
-                  </div>
+              <label className="block text-sm text-gray-400 mb-2">Photos du produit <span className="text-gray-500 text-xs">(plusieurs photos possibles)</span></label>
+              {previews.length > 0 && (
+                <div className="flex flex-wrap gap-3 mb-3">
+                  {previews.map((src, i) => (
+                    <div key={i} className="relative group">
+                      <img src={src} className="w-20 h-20 object-cover rounded-lg border border-gray-700"/>
+                      {i === 0 && <span className="absolute top-1 left-1 bg-amber-500 text-black text-[9px] font-bold px-1.5 py-0.5 rounded">Principal</span>}
+                      <button type="button" onClick={() => removeImage(i)} className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition">x</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div onClick={() => fileRef.current?.click()} className="border-2 border-dashed border-gray-700 hover:border-amber-500 rounded-xl p-5 text-center cursor-pointer transition">
+                {uploading ? (
+                  <p className="text-amber-400">Upload en cours...</p>
                 ) : (
                   <div>
-                    <p className="text-4xl mb-2">+</p>
-                    <p className="text-gray-400">Cliquer pour choisir une image</p>
-                    <p className="text-gray-600 text-sm mt-1">JPG, PNG, WEBP</p>
+                    <p className="text-2xl mb-1">+</p>
+                    <p className="text-gray-400 text-sm">{previews.length > 0 ? "Ajouter d'autres photos" : 'Cliquer pour choisir des photos'}</p>
+                    <p className="text-gray-600 text-xs mt-1">JPG, PNG, WEBP — selection multiple possible</p>
                   </div>
                 )}
               </div>
-              <input ref={fileRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden"/>
-              {!form.image && (
-                <p className="text-red-400 text-sm mt-2">Image requise avant de publier</p>
+              <input ref={fileRef} type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden"/>
+              {form.images.length === 0 && (
+                <p className="text-red-400 text-sm mt-2">Au moins une image requise</p>
               )}
             </div>
 
@@ -219,8 +238,8 @@ export default function ProduitsPage() {
               </div>
             </div>
 
-            <button type="submit" disabled={saving || uploading || !form.image} className="w-full bg-amber-500 hover:bg-amber-400 disabled:bg-gray-700 disabled:text-gray-500 text-black font-bold py-4 rounded-lg transition text-lg">
-              {saving ? 'Enregistrement...' : uploading ? 'Upload image...' : editing ? 'Enregistrer les modifications' : 'Publier le produit'}
+            <button type="submit" disabled={saving || uploading || form.images.length === 0} className="w-full bg-amber-500 hover:bg-amber-400 disabled:bg-gray-700 disabled:text-gray-500 text-black font-bold py-4 rounded-lg transition text-lg">
+              {saving ? 'Enregistrement...' : uploading ? 'Upload en cours...' : editing ? 'Enregistrer les modifications' : 'Publier le produit'}
             </button>
           </form>
         </div>
