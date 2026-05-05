@@ -1,50 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server'
-
 const GH = 'https://api.github.com'
 const FILE_PATH = 'public/data/products.json'
-
 async function ghGet(path: string) {
   const url = GH + '/repos/' + process.env.GITHUB_REPO + '/contents/' + path
   const res = await fetch(url, {
     headers: { Authorization: 'Bearer ' + process.env.GITHUB_TOKEN, Accept: 'application/vnd.github+json' },
     cache: 'no-store',
   })
-  if (!res.ok) return { content: [], sha: null }
   const data = await res.json()
   const decoded = Buffer.from(data.content, 'base64').toString('utf-8')
   return { content: JSON.parse(decoded), sha: data.sha }
 }
-
 async function ghWrite(content: object, sha: string | null, message: string) {
   const url = GH + '/repos/' + process.env.GITHUB_REPO + '/contents/' + FILE_PATH
   const encoded = Buffer.from(JSON.stringify(content, null, 2)).toString('base64')
-  const body: Record<string, unknown> = {
-    message,
-    content: encoded,
-    branch: process.env.GITHUB_BRANCH || 'main',
-  }
+  const body: Record<string, unknown> = { message, content: encoded, branch: process.env.GITHUB_BRANCH || 'main' }
   if (sha) body.sha = sha
   const res = await fetch(url, {
     method: 'PUT',
     headers: { Authorization: 'Bearer ' + process.env.GITHUB_TOKEN, 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
-  if (!res.ok) throw new Error(await res.text())
 }
-
 export async function GET() {
   try {
-    const result = await ghGet(FILE_PATH)
-    const list = result.content
-    return NextResponse.json(Array.isArray(list) ? list : [])
+    const res = await fetch('https://studio-pearl-eta.vercel.app/api/products', { cache: 'no-store' })
+    const all = await res.json()
+    return NextResponse.json(Array.isArray(all) ? all : [])
   } catch { return NextResponse.json([]) }
 }
-
 export async function POST(request: NextRequest) {
   try {
     const product = await request.json()
-    const pid = product.id ? product.id : Date.now().toString()
-    product.id = pid
+    product.id = product.id || Date.now().toString()
     product.createdAt = new Date().toISOString()
     const result = await ghGet(FILE_PATH)
     const list = Array.isArray(result.content) ? result.content : []
@@ -53,7 +41,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, product })
   } catch (e) { return NextResponse.json({ success: false, error: String(e) }, { status: 500 }) }
 }
-
 export async function PUT(request: NextRequest) {
   try {
     const product = await request.json()
@@ -66,7 +53,6 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true, product: list[i] })
   } catch (e) { return NextResponse.json({ success: false, error: String(e) }, { status: 500 }) }
 }
-
 export async function DELETE(request: NextRequest) {
   try {
     const body = await request.json()
