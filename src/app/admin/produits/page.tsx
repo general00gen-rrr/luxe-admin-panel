@@ -189,6 +189,11 @@ export default function ProduitsPage() {
                 )}
               </div>
               <input ref={fileRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden"/>
+              {!form.image && !uploading && (
+                <p className="text-red-400 text-sm mt-2">image obligatoire</p>
+              )}
+                <p className="text-red-400 text-sm mt-2">⚠️ صورة المنتج مطلوبة قبل النشر</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -207,7 +212,7 @@ export default function ProduitsPage() {
               </div>
             </div>
 
-            <button type="submit" disabled={saving || uploading} className="w-full bg-amber-500 hover:bg-amber-400 disabled:bg-gray-700 disabled:text-gray-500 text-black font-bold py-4 rounded-lg transition text-lg">
+            <button type="submit" disabled={saving || uploading || !form.image} className="w-full bg-amber-500 hover:bg-amber-400 disabled:bg-gray-700 disabled:text-gray-500 text-black font-bold py-4 rounded-lg transition text-lg">
               {saving ? '⏳ Enregistrement...' : uploading ? '⏳ Upload image...' : editing ? '✅ Enregistrer les modifications' : '🚀 Publier le produit'}
             </button>
           </form>
