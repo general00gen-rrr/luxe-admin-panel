@@ -19,30 +19,37 @@ export default function AdminLogin() {
     if (res.ok) {
       router.push('/admin')
     } else {
-      setError('Mot de passe incorrect')
+      setError('كلمة المرور غير صحيحة')
       setLoading(false)
     }
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: '#0f0f0f' }}>
-      <div style={{ background: '#1a1a1a', padding: '2rem', borderRadius: '12px', width: '360px', border: '1px solid #2a2a2a' }}>
-        <h1 style={{ color: '#d4af37', marginBottom: '1.5rem', textAlign: 'center', fontSize: '1.2rem' }}>LUXE Admin</h1>
+    <div className="flex h-screen items-center justify-center bg-slate-950 px-4 font-sans" dir="rtl">
+      <div className="bg-slate-900 p-8 rounded-3xl w-full max-w-sm border border-slate-800 shadow-2xl text-center">
+        <div className="w-14 h-14 bg-sky-500/10 border border-sky-400/30 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 text-cyan-400">
+          💧
+        </div>
+        <h1 className="text-white font-extrabold text-2xl mb-1">أكوا كلين</h1>
+        <p className="text-slate-400 text-xs mb-6">تسجيل الدخول للوحة التحكم</p>
+
         <input
           type='password'
-          placeholder='Mot de passe'
+          placeholder='كلمة المرور'
           value={password}
           onChange={e => setPassword(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleLogin()}
-          style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #333', background: '#111', color: 'white', marginBottom: '1rem', boxSizing: 'border-box' }}
+          className="w-full px-4 py-3.5 rounded-xl border border-slate-700 bg-slate-800 text-white placeholder-slate-500 mb-4 focus:outline-none focus:border-sky-500 text-sm font-bold transition"
         />
-        {error && <p style={{ color: '#ff6b6b', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</p>}
+
+        {error && <p className="text-red-400 mb-4 text-xs font-bold bg-red-950/40 border border-red-900/50 py-2 rounded-lg">{error}</p>}
+
         <button
           onClick={handleLogin}
           disabled={loading}
-          style={{ width: '100%', padding: '0.75rem', background: loading ? '#888' : '#d4af37', color: '#000', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}
+          className="w-full py-3.5 bg-sky-600 hover:bg-sky-500 disabled:bg-slate-800 text-white font-bold rounded-xl shadow-lg transition text-sm"
         >
-          {loading ? 'Connexion...' : 'Connexion'}
+          {loading ? 'جاري التحقق...' : 'تسجيل الدخول'}
         </button>
       </div>
     </div>
